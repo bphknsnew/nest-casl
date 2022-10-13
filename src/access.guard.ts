@@ -1,14 +1,14 @@
-import { CanActivate, Injectable, ExecutionContext } from '@nestjs/common';
-import { ModuleRef, Reflector } from '@nestjs/core';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { ContextIdFactory, ModuleRef, Reflector } from '@nestjs/core';
 
 import { AccessService } from './access.service';
 import { CaslConfig } from './casl.config';
 import { CASL_META_ABILITY } from './casl.constants';
-import { AbilityMetadata } from './interfaces/ability-metadata.interface';
 import { subjectHookFactory } from './factories/subject-hook.factory';
 import { userHookFactory } from './factories/user-hook.factory';
-import { RequestProxy } from './proxies/request.proxy';
+import { AbilityMetadata } from './interfaces/ability-metadata.interface';
 import { ContextProxy } from './proxies/context.proxy';
+import { RequestProxy } from './proxies/request.proxy';
 
 @Injectable()
 export class AccessGuard implements CanActivate {
@@ -23,9 +23,9 @@ export class AccessGuard implements CanActivate {
     const request = await ContextProxy.create(context).getRequest();
     const { getUserHook } = CaslConfig.getRootOptions();
     const req = new RequestProxy(request);
-
-    req.setUserHook(await userHookFactory(this.moduleRef, getUserHook));
-    req.setSubjectHook(await subjectHookFactory(this.moduleRef, ability?.subjectHook));
+    const contextId = ContextIdFactory.getByRequest(request);
+    req.setUserHook(await userHookFactory(this.moduleRef, contextId, getUserHook));
+    req.setSubjectHook(await subjectHookFactory(this.moduleRef, contextId, ability?.subjectHook));
 
     return await this.accessService.canActivateAbility(request, ability);
   }

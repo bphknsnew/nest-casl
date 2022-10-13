@@ -1,8 +1,10 @@
 import { AnyClass } from '@casl/ability/dist/types/types';
-import { ModuleRef } from '@nestjs/core';
+import { ContextId, ModuleRef } from '@nestjs/core';
 
 import { AuthorizableUser } from '../interfaces/authorizable-user.interface';
 import { UserBeforeFilterHook, UserBeforeFilterTuple } from '../interfaces/hooks.interface';
+
+const map = new Map<number, boolean>();
 
 export class NullUserHook implements UserBeforeFilterHook {
   public async run(): Promise<undefined> {
@@ -24,6 +26,7 @@ export class TupleUserHook<Service> implements UserBeforeFilterHook {
 
 export async function userHookFactory(
   moduleRef: ModuleRef,
+  contextId: ContextId,
   hookOrTuple?: AnyClass<UserBeforeFilterHook> | UserBeforeFilterTuple,
 ): Promise<UserBeforeFilterHook> {
   if (!hookOrTuple) {
@@ -34,5 +37,11 @@ export async function userHookFactory(
     const service = moduleRef.get(ServiceClass);
     return new TupleUserHook<typeof ServiceClass>(service, runFunction);
   }
-  return moduleRef.create<UserBeforeFilterHook>(hookOrTuple);
+
+  if (!map.has(contextId.id)) {
+    map.set(contextId.id, true);
+    await moduleRef.create<UserBeforeFilterHook>(hookOrTuple);
+  }
+
+  return moduleRef.resolve(hookOrTuple, contextId);
 }
