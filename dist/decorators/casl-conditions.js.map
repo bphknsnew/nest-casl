@@ -1,0 +1,1 @@
+{"version":3,"file":"casl-conditions.js","sourceRoot":"","sources":["../../src/decorators/casl-conditions.ts"],"names":[],"mappings":";;;AAAA,2CAAwE;AAExE,4DAAwD;AAE3C,QAAA,cAAc,GAAG,IAAA,6BAAoB,EAAC,KAAK,EAAE,IAAa,EAAE,OAAyB,EAAE,EAAE;IACpG,MAAM,OAAO,GAAG,MAAM,4BAAY,CAAC,MAAM,CAAC,OAAO,CAAC,CAAC,UAAU,EAAE,CAAC;IAChE,OAAO,OAAO,CAAC,IAAI,CAAC,UAAU,CAAC;AACjC,CAAC,CAAC,CAAC"}
