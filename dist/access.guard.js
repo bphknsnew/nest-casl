@@ -36,7 +36,10 @@ let AccessGuard = class AccessGuard {
     }
 };
 AccessGuard = __decorate([
-    (0, common_1.Injectable)(),
+    (0, common_1.Injectable)({
+        scope: common_1.Scope.REQUEST,
+        durable: true,
+    }),
     __metadata("design:paramtypes", [core_1.Reflector,
         access_service_1.AccessService,
         core_1.ModuleRef])

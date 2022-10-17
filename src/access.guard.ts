@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, Scope } from '@nestjs/common';
 import { ModuleRef, Reflector } from '@nestjs/core';
 
 import { AccessService } from './access.service';
@@ -10,7 +10,10 @@ import { AbilityMetadata } from './interfaces/ability-metadata.interface';
 import { ContextProxy } from './proxies/context.proxy';
 import { RequestProxy } from './proxies/request.proxy';
 
-@Injectable()
+@Injectable({
+  scope: Scope.REQUEST,
+  durable: true,
+})
 export class AccessGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
