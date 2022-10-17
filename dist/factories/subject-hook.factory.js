@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.subjectHookFactory = exports.TupleSubjectHook = exports.NullSubjectHook = void 0;
+const core_1 = require("@nestjs/core");
 const map = new Map();
 class NullSubjectHook {
     async run() {
@@ -19,7 +20,7 @@ class TupleSubjectHook {
     }
 }
 exports.TupleSubjectHook = TupleSubjectHook;
-async function subjectHookFactory(moduleRef, contextId, hookOrTuple) {
+async function subjectHookFactory(moduleRef, request, hookOrTuple) {
     if (!hookOrTuple) {
         return new NullSubjectHook();
     }
@@ -28,10 +29,12 @@ async function subjectHookFactory(moduleRef, contextId, hookOrTuple) {
         const service = moduleRef.get(ServiceClass, { strict: false });
         return new TupleSubjectHook(service, runFunction);
     }
-    if (!map.has(contextId.id)) {
-        map.set(contextId.id, true);
+    const tenantHeader = request.headers['x-tenant-id'];
+    if (!map.has(tenantHeader)) {
+        map.set(tenantHeader, core_1.ContextIdFactory.getByRequest(request));
         await moduleRef.create(hookOrTuple);
     }
+    const contextId = map.get(tenantHeader);
     return moduleRef.resolve(hookOrTuple, contextId);
 }
 exports.subjectHookFactory = subjectHookFactory;

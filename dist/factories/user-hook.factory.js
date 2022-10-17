@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.userHookFactory = exports.TupleUserHook = exports.NullUserHook = void 0;
+const core_1 = require("@nestjs/core");
 const map = new Map();
 class NullUserHook {
     async run() {
@@ -19,7 +20,7 @@ class TupleUserHook {
     }
 }
 exports.TupleUserHook = TupleUserHook;
-async function userHookFactory(moduleRef, contextId, hookOrTuple) {
+async function userHookFactory(moduleRef, request, hookOrTuple) {
     if (!hookOrTuple) {
         return new NullUserHook();
     }
@@ -28,11 +29,13 @@ async function userHookFactory(moduleRef, contextId, hookOrTuple) {
         const service = moduleRef.get(ServiceClass);
         return new TupleUserHook(service, runFunction);
     }
-    if (!map.has(contextId.id)) {
-        map.set(contextId.id, true);
+    const tenantHeader = request.headers['x-tenant-id'];
+    if (!map.has(tenantHeader)) {
+        map.set(tenantHeader, core_1.ContextIdFactory.getByRequest(request));
         await moduleRef.create(hookOrTuple);
     }
-    return moduleRef.resolve(hookOrTuple, contextId);
+    const contextId = map.get(tenantHeader);
+    return await moduleRef.resolve(hookOrTuple, contextId);
 }
 exports.userHookFactory = userHookFactory;
 //# sourceMappingURL=user-hook.factory.js.map

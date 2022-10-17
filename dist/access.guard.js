@@ -30,9 +30,8 @@ let AccessGuard = class AccessGuard {
         const request = await context_proxy_1.ContextProxy.create(context).getRequest();
         const { getUserHook } = casl_config_1.CaslConfig.getRootOptions();
         const req = new request_proxy_1.RequestProxy(request);
-        const contextId = core_1.ContextIdFactory.getByRequest(request);
-        req.setUserHook(await (0, user_hook_factory_1.userHookFactory)(this.moduleRef, contextId, getUserHook));
-        req.setSubjectHook(await (0, subject_hook_factory_1.subjectHookFactory)(this.moduleRef, contextId, ability === null || ability === void 0 ? void 0 : ability.subjectHook));
+        req.setUserHook(await (0, user_hook_factory_1.userHookFactory)(this.moduleRef, request, getUserHook));
+        req.setSubjectHook(await (0, subject_hook_factory_1.subjectHookFactory)(this.moduleRef, request, ability === null || ability === void 0 ? void 0 : ability.subjectHook));
         return await this.accessService.canActivateAbility(request, ability);
     }
 };
