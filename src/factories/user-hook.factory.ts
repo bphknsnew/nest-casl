@@ -39,7 +39,9 @@ export async function userHookFactory(
   const contextId = ContextIdFactory.getByRequest(request);
   let hook: UserBeforeFilterHook;
   try {
-    hook = await moduleRef.resolve<UserBeforeFilterHook>(hookOrTuple, contextId);
+    hook = await moduleRef.resolve<UserBeforeFilterHook>(hookOrTuple, contextId, {
+      strict: false,
+    });
   } catch (err) {
     hook = await moduleRef.create<UserBeforeFilterHook>(hookOrTuple);
   }

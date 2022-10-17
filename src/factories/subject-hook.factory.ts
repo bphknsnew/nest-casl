@@ -39,8 +39,11 @@ export async function subjectHookFactory(
   const contextId = ContextIdFactory.getByRequest(request);
   let hook: SubjectBeforeFilterHook;
   try {
-    hook = await moduleRef.resolve(hookOrTuple, contextId);
+    hook = await moduleRef.resolve(hookOrTuple, contextId, {
+      strict: false,
+    });
   } catch (err) {
+    moduleRef.registerRequestByContextId(request, contextId);
     hook = await moduleRef.create<SubjectBeforeFilterHook>(hookOrTuple);
   }
   return hook;

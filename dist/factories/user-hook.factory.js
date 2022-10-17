@@ -31,7 +31,9 @@ async function userHookFactory(moduleRef, request, hookOrTuple) {
     const contextId = core_1.ContextIdFactory.getByRequest(request);
     let hook;
     try {
-        hook = await moduleRef.resolve(hookOrTuple, contextId);
+        hook = await moduleRef.resolve(hookOrTuple, contextId, {
+            strict: false,
+        });
     }
     catch (err) {
         hook = await moduleRef.create(hookOrTuple);

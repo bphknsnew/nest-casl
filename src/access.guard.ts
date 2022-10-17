@@ -10,10 +10,7 @@ import { AbilityMetadata } from './interfaces/ability-metadata.interface';
 import { ContextProxy } from './proxies/context.proxy';
 import { RequestProxy } from './proxies/request.proxy';
 
-@Injectable({
-  scope: Scope.REQUEST,
-  durable: true,
-})
+@Injectable()
 export class AccessGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
