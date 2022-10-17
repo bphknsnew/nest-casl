@@ -1,5 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { ContextIdFactory, ModuleRef, Reflector } from '@nestjs/core';
+import { ModuleRef, Reflector } from '@nestjs/core';
 
 import { AccessService } from './access.service';
 import { CaslConfig } from './casl.config';
@@ -23,9 +23,8 @@ export class AccessGuard implements CanActivate {
     const request = await ContextProxy.create(context).getRequest();
     const { getUserHook } = CaslConfig.getRootOptions();
     const req = new RequestProxy(request);
-    const contextId = ContextIdFactory.getByRequest(request);
-    req.setUserHook(await userHookFactory(this.moduleRef, contextId, getUserHook));
-    req.setSubjectHook(await subjectHookFactory(this.moduleRef, contextId, ability?.subjectHook));
+    req.setUserHook(await userHookFactory(this.moduleRef, request, getUserHook));
+    req.setSubjectHook(await subjectHookFactory(this.moduleRef, request, ability?.subjectHook));
 
     return await this.accessService.canActivateAbility(request, ability);
   }

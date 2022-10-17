@@ -1,9 +1,10 @@
 import { AnyClass, AnyObject } from '@casl/ability/dist/types/types';
-import { ContextId, ModuleRef } from '@nestjs/core';
+import { ContextId, ContextIdFactory, ModuleRef } from '@nestjs/core';
 
 import { AuthorizableRequest } from '../interfaces/request.interface';
 import { SubjectBeforeFilterHook, SubjectBeforeFilterTuple } from '../interfaces/hooks.interface';
-const map = new Map<number, boolean>();
+import { AuthorizableUser } from 'interfaces/authorizable-user.interface';
+const map = new Map<string, ContextId>();
 export class NullSubjectHook implements SubjectBeforeFilterHook {
   public async run(): Promise<undefined> {
     return undefined;
@@ -24,7 +25,7 @@ export class TupleSubjectHook<Service> implements SubjectBeforeFilterHook {
 
 export async function subjectHookFactory(
   moduleRef: ModuleRef,
-  contextId: ContextId,
+  request: AuthorizableRequest<AuthorizableUser<string, string>, AnyObject>,
   hookOrTuple?: AnyClass<SubjectBeforeFilterHook> | SubjectBeforeFilterTuple,
 ): Promise<SubjectBeforeFilterHook> {
   if (!hookOrTuple) {
@@ -36,9 +37,12 @@ export async function subjectHookFactory(
     return new TupleSubjectHook<typeof ServiceClass>(service, runFunction);
   }
 
-  if (!map.has(contextId.id)) {
-    map.set(contextId.id, true);
+  const tenantHeader = request.headers['x-tenant-id'];
+
+  if (!map.has(tenantHeader)) {
+    map.set(tenantHeader, ContextIdFactory.getByRequest(request));
     await moduleRef.create<SubjectBeforeFilterHook>(hookOrTuple);
   }
+  const contextId = map.get(tenantHeader);
   return moduleRef.resolve(hookOrTuple, contextId);
 }
