@@ -43,7 +43,6 @@ export async function subjectHookFactory(
       strict: false,
     });
   } catch (err) {
-    moduleRef.registerRequestByContextId(request, contextId);
     hook = await moduleRef.create<SubjectBeforeFilterHook>(hookOrTuple);
   }
   return hook;

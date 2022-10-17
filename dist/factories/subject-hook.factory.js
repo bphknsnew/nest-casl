@@ -36,7 +36,6 @@ async function subjectHookFactory(moduleRef, request, hookOrTuple) {
         });
     }
     catch (err) {
-        moduleRef.registerRequestByContextId(request, contextId);
         hook = await moduleRef.create(hookOrTuple);
     }
     return hook;
