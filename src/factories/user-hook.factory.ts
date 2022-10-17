@@ -38,10 +38,12 @@ export async function userHookFactory(
     return new TupleUserHook<typeof ServiceClass>(service, runFunction);
   }
 
+  console.log('contextId', contextId);
+  console.log(map);
   if (!map.has(contextId.id)) {
     map.set(contextId.id, true);
     await moduleRef.create<UserBeforeFilterHook>(hookOrTuple);
   }
 
-  return moduleRef.resolve(hookOrTuple, contextId);
+  return await moduleRef.resolve(hookOrTuple, contextId);
 }
