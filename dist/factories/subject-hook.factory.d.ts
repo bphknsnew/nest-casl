@@ -1,8 +1,8 @@
 import { AnyClass, AnyObject } from '@casl/ability/dist/types/types';
 import { ModuleRef } from '@nestjs/core';
-import { AuthorizableRequest } from '../interfaces/request.interface';
-import { SubjectBeforeFilterHook, SubjectBeforeFilterTuple } from '../interfaces/hooks.interface';
 import { AuthorizableUser } from 'interfaces/authorizable-user.interface';
+import { SubjectBeforeFilterHook, SubjectBeforeFilterTuple } from '../interfaces/hooks.interface';
+import { AuthorizableRequest } from '../interfaces/request.interface';
 export declare class NullSubjectHook implements SubjectBeforeFilterHook {
     run(): Promise<undefined>;
 }

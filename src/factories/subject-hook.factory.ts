@@ -1,10 +1,9 @@
 import { AnyClass, AnyObject } from '@casl/ability/dist/types/types';
-import { ContextId, ContextIdFactory, ModuleRef } from '@nestjs/core';
+import { ContextIdFactory, ModuleRef } from '@nestjs/core';
 
-import { AuthorizableRequest } from '../interfaces/request.interface';
-import { SubjectBeforeFilterHook, SubjectBeforeFilterTuple } from '../interfaces/hooks.interface';
 import { AuthorizableUser } from 'interfaces/authorizable-user.interface';
-const map = new Map<string, ContextId>();
+import { SubjectBeforeFilterHook, SubjectBeforeFilterTuple } from '../interfaces/hooks.interface';
+import { AuthorizableRequest } from '../interfaces/request.interface';
 export class NullSubjectHook implements SubjectBeforeFilterHook {
   public async run(): Promise<undefined> {
     return undefined;
@@ -37,12 +36,12 @@ export async function subjectHookFactory(
     return new TupleSubjectHook<typeof ServiceClass>(service, runFunction);
   }
 
-  const tenantHeader = request.headers['x-tenant-id'];
-
-  if (!map.has(tenantHeader)) {
-    map.set(tenantHeader, ContextIdFactory.getByRequest(request));
-    await moduleRef.create<SubjectBeforeFilterHook>(hookOrTuple);
+  const contextId = ContextIdFactory.getByRequest(request);
+  let hook: SubjectBeforeFilterHook;
+  try {
+    hook = await moduleRef.resolve(hookOrTuple, contextId);
+  } catch (err) {
+    hook = await moduleRef.create<SubjectBeforeFilterHook>(hookOrTuple);
   }
-  const contextId = map.get(tenantHeader);
-  return moduleRef.resolve(hookOrTuple, contextId);
+  return hook;
 }

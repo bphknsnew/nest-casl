@@ -1,11 +1,9 @@
 import { AnyClass, AnyObject } from '@casl/ability/dist/types/types';
-import { ContextId, ContextIdFactory, ModuleRef } from '@nestjs/core';
+import { ContextIdFactory, ModuleRef } from '@nestjs/core';
 import { AuthorizableRequest } from 'interfaces/request.interface';
 
 import { AuthorizableUser } from '../interfaces/authorizable-user.interface';
 import { UserBeforeFilterHook, UserBeforeFilterTuple } from '../interfaces/hooks.interface';
-
-const map = new Map<string, ContextId>();
 
 export class NullUserHook implements UserBeforeFilterHook {
   public async run(): Promise<undefined> {
@@ -38,12 +36,13 @@ export async function userHookFactory(
     const service = moduleRef.get(ServiceClass);
     return new TupleUserHook<typeof ServiceClass>(service, runFunction);
   }
-
-  const tenantHeader = request.headers['x-tenant-id'];
-  if (!map.has(tenantHeader)) {
-    map.set(tenantHeader, ContextIdFactory.getByRequest(request));
-    await moduleRef.create<UserBeforeFilterHook>(hookOrTuple);
+  const contextId = ContextIdFactory.getByRequest(request);
+  let hook: UserBeforeFilterHook;
+  try {
+    hook = await moduleRef.resolve<UserBeforeFilterHook>(hookOrTuple, contextId);
+  } catch (err) {
+    hook = await moduleRef.create<UserBeforeFilterHook>(hookOrTuple);
   }
-  const contextId = map.get(tenantHeader);
-  return await moduleRef.resolve(hookOrTuple, contextId);
+
+  return hook;
 }

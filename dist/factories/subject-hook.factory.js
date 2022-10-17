@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.subjectHookFactory = exports.TupleSubjectHook = exports.NullSubjectHook = void 0;
 const core_1 = require("@nestjs/core");
-const map = new Map();
 class NullSubjectHook {
     async run() {
         return undefined;
@@ -29,13 +28,15 @@ async function subjectHookFactory(moduleRef, request, hookOrTuple) {
         const service = moduleRef.get(ServiceClass, { strict: false });
         return new TupleSubjectHook(service, runFunction);
     }
-    const tenantHeader = request.headers['x-tenant-id'];
-    if (!map.has(tenantHeader)) {
-        map.set(tenantHeader, core_1.ContextIdFactory.getByRequest(request));
-        await moduleRef.create(hookOrTuple);
+    const contextId = core_1.ContextIdFactory.getByRequest(request);
+    let hook;
+    try {
+        hook = await moduleRef.resolve(hookOrTuple, contextId);
     }
-    const contextId = map.get(tenantHeader);
-    return moduleRef.resolve(hookOrTuple, contextId);
+    catch (err) {
+        hook = await moduleRef.create(hookOrTuple);
+    }
+    return hook;
 }
 exports.subjectHookFactory = subjectHookFactory;
 //# sourceMappingURL=subject-hook.factory.js.map
